@@ -1,0 +1,61 @@
+% ----------------------------------------------------------------
+% utilities.pl
+% PIKA-lab
+% Year: 2019
+% -------------------------------------------------------------------------------
+
+
+writeList([]).
+writeList([X|Others]) :-
+	write(X),write('\n'),
+	writeList(Others).
+
+
+%-----------------------------------------------------------------
+
+assertaList([]).
+assertaList([X|Others]) :-
+	asserta(X),
+	assertaList(Others).
+
+%-----------------------------------------------------------------
+sort(List,Sorted):-q_sort(List,[],Sorted).
+q_sort([],Acc,Acc).
+q_sort([H|T],Acc,Sorted):-
+	pivoting(H,T,L1,L2),
+	q_sort(L1,Acc,Sorted1),q_sort(L2,[H|Sorted1],Sorted).
+
+pivoting(H,[],[],[]).
+pivoting(H,[X|T],[X|L],G):- term_greater_than(H,X),pivoting(H,T,L,G).
+%X=<H,pivoting(H,T,L,G).
+pivoting(H,[X|T],L,[X|G]):-term_greater_than(X,H),pivoting(H,T,L,G).
+%X>H,pivoting(H,T,L,G).
+
+%-----------------------------------------------------------------
+subtract([], _, []).
+subtract([Head|Tail], L2, L3) :-
+        member(Head, L2),
+        !,
+        subtract(Tail, L2, L3).
+subtract([Head|Tail1], L2, [Head|Tail3]) :-
+        subtract(Tail1, L2, Tail3).
+
+%------------------------------------------------------------------
+isEmptyList([]).
+
+%------------------------------------------------------------------
+
+append( [], X, X).
+append( [X|Y], Z, [X|W]) :- append(Y, Z, W).
+
+
+retractall(Head) :-
+   retract((Head :- _)),
+   fail.
+retractall(_).
+
+%------------------------------------------------------------------
+appendLists([], []).
+appendLists([H|T], R) :-
+    appendLists(T, AT),
+    append(H, AT, R).

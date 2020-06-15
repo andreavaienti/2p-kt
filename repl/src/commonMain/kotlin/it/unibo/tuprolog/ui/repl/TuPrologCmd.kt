@@ -91,6 +91,8 @@ class TuPrologCmd : CliktCommand(
     fun getSolver(): Solver {
         TermUi.echo("# 2P-Kt version ${Info.VERSION}")
         val theory: Theory = this.loadTheory()
+        //val theory: Theory = Arg2pLibrary.testTheory()
+        //return Arg2pLibrary.getSolver(theory)
         return Solver.classicWithDefaultBuiltins(staticKb = theory)
     }
 }

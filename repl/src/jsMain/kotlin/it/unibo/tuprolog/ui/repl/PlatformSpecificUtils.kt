@@ -9,3 +9,7 @@ actual fun isReadableFile(path: String): Boolean {
 actual fun loadTheoryFromFile(path: String): Theory {
     TODO("Not yet implemented")
 }
+
+actual fun loadResourceAsTheory(path: String): Theory {
+    TODO("Not yet implemented")
+}

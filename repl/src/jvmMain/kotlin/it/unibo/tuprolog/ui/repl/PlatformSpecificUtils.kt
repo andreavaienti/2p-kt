@@ -13,3 +13,6 @@ actual fun loadTheoryFromFile(path: String): Theory {
         Theory.parse(it.readText())
     }
 }
+
+actual fun loadResourceAsTheory(path: String): Theory =
+    Theory.parse({}.javaClass.getClassLoader().getResource(path).readText())
