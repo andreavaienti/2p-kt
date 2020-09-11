@@ -6,7 +6,6 @@ import node.NpmPublishExtension
 import node.NpmPublishPlugin
 import node.People
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.dokka.gradle.GradlePassConfigurationImpl
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsSetupTask
@@ -259,13 +258,13 @@ fun Project.configureUploadToGithub(
 }
 
 fun Project.configureDokka(vararg platforms: String) {
-    tasks.withType<DokkaTask> {
-        outputDirectory = docDir
-        outputFormat = "html"
+    tasks.withType<DokkaTask>().configureEach {
+        outputDirectory.set(docDir)
 
-        if (platforms.isNotEmpty()) {
-            multiplatform {
-                platforms.forEach { registerPlatform(it) }
+        dokkaSourceSets {
+            configureEach {
+                noStdlibLink.set(false)
+                noJdkLink.set(false)
             }
         }
     }
@@ -282,7 +281,7 @@ fun Project.configureDokka(vararg platforms: String) {
 
             task<Jar>(packDokkaForPlatform) {
                 group = "documentation"
-                dependsOn("dokka")
+                dependsOn("dokkaHtml")
                 from(docDir)
                 archiveBaseName.set(project.name)
                 archiveVersion.set(project.version.toString())
@@ -295,7 +294,7 @@ fun Project.configureDokka(vararg platforms: String) {
     } else {
         val packDokka by tasks.creating(Jar::class) {
             group = "documentation"
-            dependsOn("dokka")
+            dependsOn("dokkaHtml")
             from(docDir)
             archiveBaseName.set(project.name)
             archiveVersion.set(project.version.toString())
@@ -428,29 +427,6 @@ fun Project.createMavenPublications(name: String, vararg componentsStrings: Stri
 }
 
 fun Set<String>.forEachProject(f: Project.() -> Unit) = allprojects.filter { it.name in this }.forEach(f)
-
-fun NamedDomainObjectContainerScope<GradlePassConfigurationImpl>.registerPlatform(
-    platform: String, configuration: Action<in GradlePassConfigurationImpl>
-) {
-
-    val low = platform.toLowerCase()
-    val up = platform.toUpperCase()
-
-    register(low) {
-        targets = listOf(up)
-        this@register.platform = low
-        includeNonPublic = false
-        reportUndocumented = false
-        collectInheritedExtensionsFromLibraries = true
-        skipEmptyPackages = true
-        noStdlibLink = true
-        noJdkLink = true
-        configuration(this@register)
-    }
-}
-
-fun NamedDomainObjectContainerScope<GradlePassConfigurationImpl>.registerPlatform(platform: String) =
-    registerPlatform(platform) { }
 
 fun Project.configureJsPackage(packageJsonTask: String = "jsPackageJson", compileTask: String = "jsMainClasses") {
     if (this == rootProject) return
